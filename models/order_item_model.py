@@ -6,6 +6,7 @@ class OrderItem(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"))
-    menu_id = Column(Integer, ForeignKey("menus.id"))
-    quantity = Column(Integer, nullable=False)
-    subtotal = Column(Float)
+    menu_id = Column(Integer)
+    quantity = Column(Integer, default=1)
+    price = Column(Float, nullable=False)
+    subtotal = Column(Float, nullable=False)

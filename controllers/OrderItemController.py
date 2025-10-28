@@ -1,17 +1,43 @@
 from flask import jsonify, request
-from config.database import get_db
+from config.database import SessionLocal
 from models.order_item_model import OrderItem
-from sqlalchemy.orm import Session
+from models.order_model import Order
 
 def add_order_item():
-    db: Session = next(get_db())
-    body = request.json
-    oi = OrderItem(
-        order_id = body.get("order_id"),
-        menu_id = body.get("menu_id"),
-        quantity = body.get("quantity"),
-        subtotal = body.get("subtotal")
-    )
-    db.add(oi)
-    db.commit()
-    return jsonify({"message": "Order item added"})
+    db = SessionLocal()
+    try:
+        data = request.get_json()
+        order_id = data.get("order_id")
+        menu_id = data.get("menu_id")
+        quantity = data.get("quantity", 1)
+        price = data.get("price", 0)
+
+        if not order_id or not menu_id:
+            return jsonify({"error": "order_id dan menu_id wajib diisi"}), 400
+
+        subtotal = price * quantity
+        new_item = OrderItem(
+            order_id=order_id,
+            menu_id=menu_id,
+            quantity=quantity,
+            price=price,
+            subtotal=subtotal
+        )
+        db.add(new_item)
+
+        # 🔹 Update total harga di tabel orders
+        order = db.query(Order).filter(Order.id == order_id).first()
+        if order:
+            order.total_price += subtotal
+
+        db.commit()
+        return jsonify({
+            "message": "Item pesanan berhasil ditambahkan",
+            "subtotal": subtotal
+        }), 201
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()

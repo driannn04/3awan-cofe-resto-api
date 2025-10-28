@@ -1,10 +1,18 @@
-from sqlalchemy import create_engine, text
+from config.database import engine, Base
+from models.order_model import Order
+from models.order_item_model import OrderItem
 
-DATABASE_URL = "postgresql://postgres:NhlSoKTjSkvZuARzWwizekSjdZeenyVP@switchback.proxy.rlwy.net:36266/railway"
-engine = create_engine(DATABASE_URL)
+print("⚠️ Menghapus tabel lama...")
+try:
+    OrderItem.__table__.drop(engine, checkfirst=True)
+    Order.__table__.drop(engine, checkfirst=True)
+    print("✅ Tabel orders & order_items berhasil dihapus.")
+except Exception as e:
+    print(f"❌ Gagal menghapus tabel: {e}")
 
-with engine.connect() as conn:
-    print("⚙️ Menghapus tabel 'orders' lama...")
-    conn.execute(text("DROP TABLE IF EXISTS orders CASCADE;"))
-    conn.commit()
-    print("✅ Tabel orders berhasil dihapus.")
+print("🧱 Membuat ulang tabel baru...")
+try:
+    Base.metadata.create_all(bind=engine)
+    print("✅ Tabel baru berhasil dibuat ulang sesuai model Python.")
+except Exception as e:
+    print(f"❌ Gagal membuat tabel baru: {e}")

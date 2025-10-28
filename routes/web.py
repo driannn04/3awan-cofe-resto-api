@@ -13,7 +13,7 @@ web.route("/api/menus/<int:id>", methods=["PUT"])(update_menu)
 web.route("/api/menus/<int:id>", methods=["DELETE"])(delete_menu)
 
 # Orders
-web.route("/api/orders", methods=["GET"])(get_all_orders) 
+web.route("/api/orders", methods=["GET"])(get_all_orders)
 web.route("/api/orders", methods=["POST"])(add_order)
 
 # Order items
