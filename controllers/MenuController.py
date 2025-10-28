@@ -3,9 +3,6 @@ from config.database import get_db
 from models.menu_model import Menu
 from sqlalchemy.orm import Session
 
-from flask import request, jsonify
-from models.menu_model import Menu
-from config.database import db
 
 def get_all_menus():
     try:
