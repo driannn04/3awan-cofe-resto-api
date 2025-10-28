@@ -3,35 +3,34 @@ from config.database import get_db
 from models.menu_model import Menu
 from sqlalchemy.orm import Session
 
-
 def get_all_menus():
-    db = get_db()
-    query = db.query(Menu)
+    db: Session = next(get_db())  # ✅ ambil objek session-nya
 
-    # 🔍 Ambil parameter search dan category dari query string
     search = request.args.get("search")
     category = request.args.get("category")
 
-    if search:
-        query = query.filter(Menu.name.ilike(f"%{search}%") | Menu.description.ilike(f"%{search}%"))
+    query = db.query(Menu)  # ✅ sekarang ini tidak error
 
+    # filter jika ada parameter pencarian
+    if search:
+        query = query.filter(Menu.name.ilike(f"%{search}%"))
     if category:
         query = query.filter(Menu.category.ilike(f"%{category}%"))
 
-    menus = query.order_by(Menu.id.desc()).all()
+    results = query.all()
 
-    result = []
-    for menu in menus:
-        result.append({
-            "id": menu.id,
-            "name": menu.name,
-            "price": menu.price,
-            "category": menu.category,
-            "description": menu.description,
-            "image_url": menu.image_url
-        })
+    return jsonify([
+        {
+            "id": m.id,
+            "name": m.name,
+            "price": m.price,
+            "category": m.category,
+            "description": m.description,
+            "image_url": m.image_url
+        }
+        for m in results
+    ])
 
-    return jsonify(result), 200
 
 
 def add_menu():
