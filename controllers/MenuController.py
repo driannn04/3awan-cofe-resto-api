@@ -5,37 +5,63 @@ from sqlalchemy.orm import Session
 
 
 def get_all_menus():
-    try:
-        search = request.args.get('search')
-        category = request.args.get('category')
+    db = get_db()
+    query = db.query(Menu)
 
-        query = db.query(Menu)
+    # 🔍 Ambil parameter search dan category dari query string
+    search = request.args.get("search")
+    category = request.args.get("category")
 
-        # Jika ada parameter search
-        if search:
-            query = query.filter(Menu.name.ilike(f"%{search}%"))
+    if search:
+        query = query.filter(Menu.name.ilike(f"%{search}%") | Menu.description.ilike(f"%{search}%"))
 
-        # Jika ada parameter kategori
-        if category:
-            query = query.filter(Menu.category.ilike(f"%{category}%"))
+    if category:
+        query = query.filter(Menu.category.ilike(f"%{category}%"))
 
-        menus = query.all()
-        result = [
-            {
-                "id": menu.id,
-                "name": menu.name,
-                "description": menu.description,
-                "price": menu.price,
-                "category": menu.category,
-                "image_url": menu.image_url,
-            }
-            for menu in menus
-        ]
+    menus = query.order_by(Menu.id.desc()).all()
 
-        return jsonify(result)
-    except Exception as e:
-        print("❌ Error:", e)
-        return jsonify({"error": str(e)}), 500
+    result = []
+    for menu in menus:
+        result.append({
+            "id": menu.id,
+            "name": menu.name,
+            "price": menu.price,
+            "category": menu.category,
+            "description": menu.description,
+            "image_url": menu.image_url
+        })
+
+    return jsonify(result), 200
+
+
+def add_menu():
+    db = get_db()
+    data = request.get_json()
+
+    # Pastikan menerima dictionary, bukan list
+    if isinstance(data, list):
+        return jsonify({"error": "Body request harus berupa JSON object, bukan list"}), 400
+
+    new_menu = Menu(
+        name=data.get("name"),
+        price=data.get("price"),
+        category=data.get("category"),
+        description=data.get("description"),
+        image_url=data.get("image_url")
+    )
+
+    db.add(new_menu)
+    db.commit()
+    db.refresh(new_menu)
+
+    return jsonify({
+        "id": new_menu.id,
+        "name": new_menu.name,
+        "price": new_menu.price,
+        "category": new_menu.category,
+        "description": new_menu.description,
+        "image_url": new_menu.image_url
+    }), 201
 
 
 def get_menu(id):
