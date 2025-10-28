@@ -5,7 +5,8 @@ from routes.web import web
 import models.menu_model, models.order_model, models.order_item_model
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
 
 # Buat tabel otomatis
 Base.metadata.create_all(bind=engine)

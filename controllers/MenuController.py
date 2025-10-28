@@ -3,20 +3,43 @@ from config.database import get_db
 from models.menu_model import Menu
 from sqlalchemy.orm import Session
 
+from flask import request, jsonify
+from models.menu_model import Menu
+from config.database import db
+
 def get_all_menus():
-    db: Session = next(get_db())
-    menus = db.query(Menu).order_by(Menu.id).all()
-    data = []
-    for m in menus:
-        data.append({
-            "id": m.id,
-            "name": m.name,
-            "price": m.price,
-            "category": m.category,
-            "description": m.description,
-            "image_url": m.image_url
-        })
-    return jsonify(data)
+    try:
+        search = request.args.get('search')
+        category = request.args.get('category')
+
+        query = db.query(Menu)
+
+        # Jika ada parameter search
+        if search:
+            query = query.filter(Menu.name.ilike(f"%{search}%"))
+
+        # Jika ada parameter kategori
+        if category:
+            query = query.filter(Menu.category.ilike(f"%{category}%"))
+
+        menus = query.all()
+        result = [
+            {
+                "id": menu.id,
+                "name": menu.name,
+                "description": menu.description,
+                "price": menu.price,
+                "category": menu.category,
+                "image_url": menu.image_url,
+            }
+            for menu in menus
+        ]
+
+        return jsonify(result)
+    except Exception as e:
+        print("❌ Error:", e)
+        return jsonify({"error": str(e)}), 500
+
 
 def get_menu(id):
     db: Session = next(get_db())
