@@ -1,43 +1,69 @@
 from sqlalchemy import create_engine, text
 
-# 🔗 Koneksi ke PostgreSQL Railway kamu
+# 🔗 URL database Railway kamu
 DATABASE_URL = "postgresql://postgres:NhlSoKTjSkvZuARzWwizekSjdZeenyVP@switchback.proxy.rlwy.net:36266/railway"
 engine = create_engine(DATABASE_URL)
 
 with engine.connect() as conn:
-    print("🚀 Menambahkan data contoh ke database...\n")
+    print("🔍 Mengecek tabel 'menus'...")
+    
+    # Bersihkan data lama
+    conn.execute(text("DELETE FROM menus;"))
+    conn.commit()
+    print("🧹 Menghapus data lama...")
 
-    # --- MENUS ---
-    conn.execute(text("""
-        INSERT INTO menus (name, price, category, description, image_url)
-        VALUES
-        ('Nasi Goreng Spesial', 25000, 'Makanan', 'Nasi goreng dengan ayam dan telur.', 'https://picsum.photos/200'),
-        ('Mie Ayam Bakso', 22000, 'Makanan', 'Mie ayam dengan tambahan bakso sapi.', 'https://picsum.photos/200'),
-        ('Es Teh Manis', 8000, 'Minuman', 'Teh manis dingin segar.', 'https://picsum.photos/200'),
-        ('Cappuccino', 20000, 'Minuman', 'Kopi susu dengan foam lembut.', 'https://picsum.photos/200');
-    """))
+    print("🍽️ Menambahkan data baru...")
 
-    # --- ORDERS ---
-    conn.execute(text("""
-        INSERT INTO orders (customer_name, total_price)
-        VALUES
-        ('Andrian', 55000),
-        ('Budi', 30000);
-    """))
+    menus = [
+        {
+            "name": "Kopi Hitam",
+            "price": 12000,
+            "category": "Coffee",
+            "description": "Kopi hitam panas khas 3awan Cafe",
+            "image_url": "https://picsum.photos/200?coffee1"
+        },
+        {
+            "name": "Cappuccino",
+            "price": 18000,
+            "category": "Coffee",
+            "description": "Cappuccino creamy dengan foam lembut",
+            "image_url": "https://picsum.photos/200?coffee2"
+        },
+        {
+            "name": "Nasi Goreng Spesial",
+            "price": 25000,
+            "category": "Makanan",
+            "description": "Nasi goreng ayam telur spesial dengan topping sayur segar",
+            "image_url": "https://picsum.photos/200?food1"
+        },
+        {
+            "name": "Mie Goreng Jawa",
+            "price": 22000,
+            "category": "Makanan",
+            "description": "Mie goreng khas Jawa dengan rasa autentik",
+            "image_url": "https://picsum.photos/200?food2"
+        },
+        {
+            "name": "Es Teh Manis",
+            "price": 8000,
+            "category": "Non Coffee",
+            "description": "Teh manis dingin penyegar tenggorokan",
+            "image_url": "https://picsum.photos/200?drink1"
+        },
+        {
+            "name": "Lemon Tea",
+            "price": 10000,
+            "category": "Non Coffee",
+            "description": "Teh lemon segar cocok untuk hari panas",
+            "image_url": "https://picsum.photos/200?drink2"
+        },
+    ]
 
-    # --- ORDER ITEMS ---
-    conn.execute(text("""
-        INSERT INTO order_items (order_id, menu_id, quantity, subtotal)
-        VALUES
-        (1, 1, 1, 25000),
-        (1, 3, 2, 16000),
-        (2, 2, 1, 22000),
-        (2, 4, 1, 20000);
-    """))
+    for menu in menus:
+        conn.execute(text("""
+            INSERT INTO menus (name, price, category, description, image_url)
+            VALUES (:name, :price, :category, :description, :image_url)
+        """), menu)
 
     conn.commit()
-    print("✅ Data contoh berhasil dimasukkan!\n")
-    print("👉 Coba buka di browser:")
-    print("   http://127.0.0.1:5000/api/menus")
-    print("   http://127.0.0.1:5000/api/orders")
-    print("   http://127.0.0.1:5000/api/order-items")
+    print("✅ Data menu berhasil dimasukkan ke tabel 'menus'!")

@@ -25,9 +25,11 @@ def add_order_item():
         )
         db.add(new_item)
 
-        # 🔹 Update total harga di tabel orders
+        # 🔹 Update total harga otomatis di tabel orders
         order = db.query(Order).filter(Order.id == order_id).first()
         if order:
+            if order.total_price is None:
+                order.total_price = 0
             order.total_price += subtotal
 
         db.commit()
