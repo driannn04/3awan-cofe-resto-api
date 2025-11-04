@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, Text, Fore
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 # 🔑 Koneksi ke Railway PostgreSQL baru
-DATABASE_URL = "postgresql://postgres:JWoBhTtKvSurQRSVfnRaFgkHhqzUtXWM@tramway.proxy.rlwy.net:10602/railway"
+DATABASE_URL = "postgresql://postgres:eEVgAaMBSqAqnIAkcHuLUAKuxSRKHiNN@mainline.proxy.rlwy.net:57119/railway"
 
 engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(bind=engine)
